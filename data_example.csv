@@ -1,0 +1,3 @@
+hotel_name,city,review_text,sentiment,rating,date,categories,keywords
+Sample Hotel,New York,Great experience with excellent service,0.8,4.5,2024-01-15,"room_quality;service_staff","service:5,room:3,clean:2"
+Test Hotel,London,Average stay with some issues,-0.2,3.0,2024-01-20,"room_quality;facilities","room:2,issue:1"

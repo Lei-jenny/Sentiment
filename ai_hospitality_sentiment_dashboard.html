@@ -1,0 +1,1903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hilton Hotels Sentiment Dashboard | Hilton</title>
+    <style>
+        * {
+            margin: 0;  
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3182ce, #2b6cb0);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .last-updated {
+            font-size: 14px;
+            color: #cbd5e0;
+        }
+
+        /* Filters */
+        .filters {
+            background: white;
+            padding: 24px;
+            margin: 24px 0;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .filter-input, .filter-select {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .filter-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
+        
+        .filter-select.active, .filter-input.active {
+            border-color: #3182ce;
+            background-color: #f0f8ff;
+            box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.1);
+        }
+
+        .reset-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            align-self: end;
+        }
+
+        .reset-btn:hover {
+            background: #c53030;
+            transform: translateY(-1px);
+        }
+
+        /* KPI Section */
+        .kpi-section {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin: 24px 0;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 32px 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: #3182ce;
+        }
+
+        .kpi-value {
+            font-size: 56px;
+            font-weight: 800;
+            color: #1a202c;
+            text-align: center;
+            margin: 0;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 80px;
+            flex-shrink: 0;
+        }
+
+        .kpi-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #4a5568;
+            text-align: center;
+            margin: 8px 0 0 0;
+            flex-shrink: 0;
+        }
+
+        .kpi-description {
+            font-size: 12px;
+            font-weight: 400;
+            color: #718096;
+            text-align: center;
+            margin: 8px 0 0 0;
+            flex-shrink: 0;
+            font-style: italic;
+        }
+
+        /* Gauge Chart */
+        .gauge-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            flex-shrink: 0;
+        }
+
+        .gauge-canvas {
+            border-radius: 8px;
+            width: 200px !important;
+            height: 200px !important;
+        }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin: 24px 0;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .chart-placeholder.category {
+            height: 400px;
+        }
+
+        .chart-placeholder.trend {
+            height: 400px;
+        }
+
+        .chart-canvas {
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 8px;
+        }
+
+        /* Keywords Section */
+        .keywords-section {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin: 24px 0;
+        }
+
+        .keywords-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .keywords-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .keyword-tag {
+            background: linear-gradient(135deg, #3182ce, #2b6cb0);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .keyword-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+        }
+
+        .keyword-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* Table Section */
+        .table-section {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin: 24px 0;
+        }
+
+        .table-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+                 .table-container {
+             overflow-x: auto;
+             height: 500px;
+             overflow-y: auto;
+         }
+         
+         .reviews-container {
+             max-height: 600px;
+             overflow-y: auto;
+             padding: 0;
+         }
+         
+         .review-card {
+             background: white;
+             border: 1px solid #e2e8f0;
+             border-radius: 12px;
+             padding: 20px;
+             margin-bottom: 16px;
+             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+             transition: all 0.2s;
+             cursor: pointer;
+         }
+         
+         .review-card:hover {
+             transform: translateY(-2px);
+             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+             border-color: #3182ce;
+         }
+         
+         .review-header {
+             display: flex;
+             justify-content: space-between;
+             align-items: flex-start;
+             margin-bottom: 12px;
+             flex-wrap: wrap;
+             gap: 12px;
+         }
+         
+         .review-hotel-info {
+             flex: 1;
+             min-width: 200px;
+         }
+         
+         .review-hotel-name {
+             font-weight: 700;
+             color: #1a202c;
+             font-size: 16px;
+             margin-bottom: 4px;
+         }
+         
+         .review-hotel-city {
+             color: #4a5568;
+             font-size: 14px;
+             margin-bottom: 4px;
+         }
+         
+         .review-rating {
+             background: #3182ce;
+             color: white;
+             padding: 6px 12px;
+             border-radius: 20px;
+             font-size: 14px;
+             font-weight: 600;
+             white-space: nowrap;
+         }
+         
+         .review-date {
+             color: #718096;
+             font-size: 12px;
+             margin-bottom: 8px;
+         }
+         
+         .review-categories {
+             display: flex;
+             flex-wrap: wrap;
+             gap: 6px;
+             margin-bottom: 12px;
+         }
+         
+         .category-tag {
+             background: #f7fafc;
+             color: #4a5568;
+             padding: 4px 8px;
+             border-radius: 12px;
+             font-size: 11px;
+             font-weight: 500;
+             border: 1px solid #e2e8f0;
+         }
+         
+         .review-content {
+             color: #2d3748;
+             line-height: 1.6;
+             margin-bottom: 12px;
+             max-height: 80px;
+             overflow: hidden;
+             position: relative;
+         }
+         
+         .review-content.expanded {
+             max-height: none;
+         }
+         
+         .review-content::after {
+             content: '';
+             position: absolute;
+             bottom: 0;
+             right: 0;
+             width: 100%;
+             height: 20px;
+             background: linear-gradient(transparent, white);
+             pointer-events: none;
+         }
+         
+         .review-content.expanded::after {
+             display: none;
+         }
+         
+         .review-keywords {
+             display: flex;
+             flex-wrap: wrap;
+             gap: 6px;
+             margin-bottom: 8px;
+         }
+         
+         .keyword-tag-small {
+             background: #edf2f7;
+             color: #4a5568;
+             padding: 3px 8px;
+             border-radius: 10px;
+             font-size: 10px;
+             font-weight: 500;
+         }
+         
+         .expand-btn {
+             background: none;
+             border: none;
+             color: #3182ce;
+             font-size: 12px;
+             font-weight: 600;
+             cursor: pointer;
+             padding: 4px 8px;
+             border-radius: 6px;
+             transition: all 0.2s;
+         }
+         
+         .expand-btn:hover {
+             background: #f0f8ff;
+         }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:hover {
+            background: #f7fafc;
+        }
+
+        /* Drawer */
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: -600px;
+            width: 600px;
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .drawer.open {
+            right: 0;
+        }
+
+        .drawer-header {
+            padding: 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .drawer-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .close-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .drawer-content {
+            padding: 24px;
+        }
+
+        .review-section {
+            margin-bottom: 24px;
+        }
+
+        .review-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+
+        .review-section p {
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        /* Keyword Reviews Popup */
+        .keyword-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .keyword-popup.show {
+            display: flex;
+        }
+
+        .keyword-popup-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .keyword-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .keyword-popup-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .keyword-popup-close {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .keyword-popup-close:hover {
+            background: #c53030;
+        }
+
+        .review-item {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 4px solid #3182ce;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .review-hotel {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .review-rating {
+            background: #3182ce;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .review-content {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .highlighted-keyword {
+            background: #fef5e7;
+            color: #d69e2e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+                 .keyword-count-badge {
+             background: #3182ce;
+             color: white;
+             padding: 4px 8px;
+             border-radius: 12px;
+             font-size: 11px;
+             font-weight: 700;
+             margin-left: 8px;
+         }
+
+         /* Negative Reviews Section */
+         .negative-reviews-container {
+             margin-top: 20px;
+             max-height: 350px; /* Compact container height */
+             overflow: hidden; /* Hide overflow from container */
+             position: relative; /* For shadow positioning */
+         }
+         
+         /* Add subtle shadow to indicate scrollable content */
+         .negative-reviews-container::after {
+             content: '';
+             position: absolute;
+             bottom: 0;
+             left: 0;
+             right: 0;
+             height: 20px;
+             background: linear-gradient(transparent, rgba(247, 250, 252, 0.8));
+             pointer-events: none;
+             z-index: 1;
+         }
+
+         .category-tabs {
+             display: flex;
+             flex-wrap: wrap;
+             gap: 6px; /* Reduced gap */
+             margin-bottom: 15px; /* Reduced margin */
+             justify-content: center;
+         }
+
+         .category-tab {
+             background: #f7fafc;
+             color: #4a5568;
+             padding: 6px 12px; /* Reduced padding */
+             border-radius: 16px; /* Smaller radius */
+             font-size: 11px; /* Smaller font */
+             font-weight: 600;
+             cursor: pointer;
+             border: 2px solid #e2e8f0;
+             transition: all 0.2s;
+         }
+
+         .category-tab:hover {
+             background: #edf2f7;
+             border-color: #cbd5e0;
+         }
+
+         .category-tab.active {
+             background: #3182ce;
+             color: white;
+             border-color: #3182ce;
+         }
+
+         .negative-reviews-content {
+             max-height: 250px; /* Reduced height for more compact layout */
+             overflow-y: auto; /* Enable vertical scrolling */
+             padding-right: 10px; /* Space for scrollbar */
+             scrollbar-width: thin; /* Thin scrollbar for Firefox */
+             scrollbar-color: #cbd5e0 #f7fafc; /* Scrollbar colors */
+         }
+         
+         /* Custom scrollbar styling for Webkit browsers */
+         .negative-reviews-content::-webkit-scrollbar {
+             width: 8px;
+         }
+         
+         .negative-reviews-content::-webkit-scrollbar-track {
+             background: #f7fafc;
+             border-radius: 4px;
+         }
+         
+         .negative-reviews-content::-webkit-scrollbar-thumb {
+             background: #cbd5e0;
+             border-radius: 4px;
+         }
+         
+         .negative-reviews-content::-webkit-scrollbar-thumb:hover {
+             background: #a0aec0;
+         }
+
+         .negative-review-item {
+             background: #fff5f5;
+             border: 1px solid #fed7d7;
+             border-radius: 10px; /* Smaller radius */
+             padding: 15px; /* Reduced padding */
+             margin-bottom: 12px; /* Reduced margin */
+             border-left: 4px solid #e53e3e;
+         }
+
+         .negative-review-header {
+             display: flex;
+             justify-content: space-between;
+             align-items: flex-start;
+             margin-bottom: 10px; /* Reduced margin */
+             flex-wrap: wrap;
+             gap: 8px; /* Reduced gap */
+         }
+
+         .negative-review-hotel {
+             font-weight: 600;
+             color: #2d3748;
+             font-size: 14px;
+         }
+
+         .negative-review-rating {
+             background: #e53e3e;
+             color: white;
+             padding: 4px 8px;
+             border-radius: 12px;
+             font-size: 11px;
+             font-weight: 600;
+         }
+
+         .negative-review-date {
+             color: #718096;
+             font-size: 11px;
+             margin-bottom: 8px;
+         }
+
+         .negative-review-content {
+             color: #2d3748;
+             line-height: 1.5; /* Tighter line height */
+             margin-bottom: 10px; /* Reduced margin */
+             font-size: 12px; /* Smaller font */
+         }
+
+         .negative-review-summary {
+             background: #fef5e7;
+             border: 1px solid #fed7d7;
+             border-radius: 6px; /* Smaller radius */
+             padding: 10px; /* Reduced padding */
+             margin-top: 6px; /* Reduced margin */
+         }
+
+         .negative-review-summary h4 {
+             color: #d69e2e;
+             font-size: 12px;
+             font-weight: 600;
+             margin-bottom: 6px;
+         }
+
+         .negative-review-summary p {
+             color: #744210;
+             font-size: 12px;
+             line-height: 1.5;
+             margin: 0;
+         }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .kpi-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+            
+            .kpi-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                grid-template-columns: 1fr;
+            }
+            
+            .drawer {
+                width: 100%;
+                right: -100%;
+            }
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3182ce;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">H</div>
+                    <h1 class="header-title">AI Hospitality Sentiment Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <div class="last-updated" id="lastUpdated">Last updated: Loading...</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <label class="filter-label">Hotel</label>
+                <select class="filter-select" id="hotelFilter">
+                    <option value="">All Hotels</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">City</label>
+                <select class="filter-select" id="cityFilter">
+                    <option value="">All Cities</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Start Date</label>
+                <input type="date" class="filter-input" id="startDateFilter">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">End Date</label>
+                <input type="date" class="filter-input" id="endDateFilter">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Search</label>
+                <input type="text" class="filter-input" id="searchInput" placeholder="Search content/title/keywords...">
+            </div>
+            <button class="reset-btn" onclick="resetFilters()">Reset Filters</button>
+        </div>
+
+        <!-- KPI Section -->
+        <div class="kpi-section">
+            <div class="kpi-card">
+                <div class="gauge-container">
+                    <canvas class="gauge-canvas" id="gaugeCanvas" width="200" height="200"></canvas>
+                </div>
+                <div class="kpi-label">Positive Sentiment</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="avgBubble">-</div>
+                <div class="kpi-label">Avg Bubble</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="totalReviews">-</div>
+                <div class="kpi-label">Reviews</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="netSentiment">-</div>
+                <div class="kpi-label">Net Sentiment</div>
+                <div class="kpi-description">Positive - Negative (%)</div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3 class="chart-title">Sentiment by Category</h3>
+                <div class="chart-placeholder category">
+                    <canvas id="categoryChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title">Trend Over Time</h3>
+                <div class="chart-placeholder trend">
+                    <canvas id="trendChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Keywords Section -->
+        <div class="keywords-section">
+            <h3 class="keywords-title">High-Frequency Keywords</h3>
+            <div class="keywords-grid" id="keywordsGrid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading keywords...
+                </div>
+            </div>
+        </div>
+
+                          <!-- Negative Reviews Section -->
+        <div class="table-section">
+            <h3 class="chart-title">Negative Reviews by Category - Improvement Focus</h3>
+            <div class="negative-reviews-container">
+                <div class="category-tabs" id="categoryTabs">
+                    <!-- Category tabs will be populated dynamically -->
+                </div>
+                <div class="negative-reviews-content" id="negativeReviewsContent">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading negative reviews...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Section -->
+         <div class="table-section">
+             <h3 class="chart-title">Review Details</h3>
+             <div class="table-container">
+                 <table>
+                     <thead>
+                         <tr>
+                             <th>Hotel</th>
+                             <th>City</th>
+                             <th>Bubble</th>
+                             <th>Categories</th>
+                             <th>Business Summary</th>
+                             <th>Top Keywords</th>
+                             <th>Review Date</th>
+                         </tr>
+                     </thead>
+                     <tbody id="tableBody">
+                         <tr>
+                             <td colspan="7" class="loading">
+                                 <div class="spinner"></div>
+                                 Loading data...
+                             </td>
+                         </tr>
+                     </tbody>
+                 </table>
+             </div>
+         </div>
+    </div>
+
+    <!-- Review Detail Drawer -->
+    <div class="drawer" id="reviewDrawer">
+        <div class="drawer-header">
+            <h3 class="drawer-title">Review Details</h3>
+            <button class="close-btn" onclick="closeDrawer()">Close</button>
+        </div>
+        <div class="drawer-content" id="drawerContent">
+            <!-- Content will be populated dynamically -->
+        </div>
+    </div>
+
+    <!-- Keyword Reviews Popup -->
+    <div class="keyword-popup" id="keywordPopup">
+        <div class="keyword-popup-content">
+            <div class="keyword-popup-header">
+                <h3 class="keyword-popup-title" id="keywordPopupTitle">Keyword Reviews</h3>
+                <button class="keyword-popup-close" onclick="closeKeywordPopup()">✕ Close</button>
+            </div>
+            <div id="keywordPopupContent">
+                <!-- Content will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentData = null;
+        let currentFilters = {};
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            setupEventListeners();
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter change events
+            document.getElementById('hotelFilter').addEventListener('change', applyFilters);
+            document.getElementById('cityFilter').addEventListener('change', applyFilters);
+            document.getElementById('startDateFilter').addEventListener('change', applyFilters);
+            document.getElementById('endDateFilter').addEventListener('change', applyFilters);
+            document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 300));
+            
+            // ESC key for popup
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeKeywordPopup();
+                }
+            });
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                currentData = data;
+                updateDashboard(data);
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+                                   // Update dashboard with data
+          function updateDashboard(data) {
+              console.log('updateDashboard called with data:', data);
+              console.log('Updating KPIs with metrics:', data.metrics);
+              
+              updateKPIs(data.metrics);
+              updateGauge(data.metrics.positive_percent);
+              updateCategoryChart(data.category_sentiment);
+              updateTrendChart(data.year_trend);
+              updateKeywords(data.keywords);
+              updateTable(data.table_data);
+              updateFilters(data.filters);
+              updateLastUpdated(data.last_updated);
+              updateFilterActiveStates();
+              
+              // Load negative reviews for improvement focus
+              loadNegativeReviews();
+              
+              console.log('Dashboard update completed');
+          }
+
+        // Update KPIs
+        function updateKPIs(metrics) {
+            console.log('updateKPIs called with metrics:', metrics);
+            console.log('Setting avgBubble to:', metrics.avg_bubble);
+            console.log('Setting totalReviews to:', metrics.total_reviews);
+            console.log('Setting netSentiment to:', metrics.net_sentiment_score + '%');
+            
+            document.getElementById('avgBubble').textContent = metrics.avg_bubble;
+            document.getElementById('totalReviews').textContent = metrics.total_reviews;
+            document.getElementById('netSentiment').textContent = metrics.net_sentiment_score + '%';
+            
+            console.log('KPIs updated successfully');
+        }
+
+        // Update gauge chart
+        function updateGauge(positivePercent) {
+            const canvas = document.getElementById('gaugeCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set fixed dimensions for consistent gauge size
+            const fixedWidth = 200;
+            const fixedHeight = 200;
+            
+            // Set high DPI for crisp rendering
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = fixedWidth * dpr;
+            canvas.height = fixedHeight * dpr;
+            ctx.scale(dpr, dpr);
+            
+            const centerX = fixedWidth / 2;
+            const centerY = fixedHeight / 2;
+            const radius = Math.min(centerX, centerY) - 20;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, fixedWidth, fixedHeight);
+            
+            // Draw background arc
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, Math.PI, 0);
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 20;
+            ctx.stroke();
+            
+            // Draw positive arc
+            const positiveAngle = (positivePercent / 100) * Math.PI;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, Math.PI, Math.PI + positiveAngle);
+            ctx.strokeStyle = '#3182ce';
+            ctx.stroke();
+            
+            // Draw percentage text
+            ctx.fillStyle = '#1a202c';
+            ctx.font = 'bold 24px Inter';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${positivePercent}%`, centerX, centerY + 8);
+        }
+
+        // Update category chart
+        function updateCategoryChart(categoryData) {
+            const canvas = document.getElementById('categoryChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Set high DPI for crisp rendering
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            const width = canvas.width / dpr;
+            const height = canvas.height / dpr;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            const categories = Object.keys(categoryData);
+            const barGroupWidth = (width - 100) / categories.length;
+            const individualBarWidth = barGroupWidth / 2 - 4; // Space for two bars + gap
+            const chartAreaHeight = height - 120; // Adjusted for legend and labels
+            const yAxisStart = height - 80;
+            const maxValue = Math.max(...Object.values(categoryData).map(d => d.total), 1);
+            
+            // Draw Y-axis
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(50, yAxisStart);
+            ctx.lineTo(50, 40);
+            ctx.stroke();
+            
+            // Y-axis labels
+            ctx.fillStyle = '#4a5568';
+            ctx.font = '12px Inter';
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 5; i++) {
+                const y = yAxisStart - (i / 5) * chartAreaHeight;
+                ctx.fillText(Math.round((i / 5) * maxValue), 45, y + 5);
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(55, y);
+                ctx.stroke();
+            }
+            
+            // Draw vertical "Review Count" label
+            ctx.save();
+            ctx.translate(20, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.textAlign = 'center';
+            ctx.fillText('Review Count', 0, 0);
+            ctx.restore();
+            
+            // Draw legend horizontally at the top center
+            const legendWidth = 180;
+            const legendX = (width - legendWidth) / 2;
+            const legendY = 20;
+            
+            ctx.fillStyle = '#3182ce';
+            ctx.fillRect(legendX, legendY, 16, 16);
+            ctx.fillStyle = '#4a5568';
+            ctx.font = '14px Inter';
+            ctx.textAlign = 'left';
+            ctx.fillText('Positive', legendX + 24, legendY + 13);
+            
+            const negativeLegendX = legendX + 90;
+            ctx.fillStyle = '#e53e3e';
+            ctx.fillRect(negativeLegendX, legendY, 16, 16);
+            ctx.fillStyle = '#4a5568';
+            ctx.font = '14px Inter';
+            ctx.textAlign = 'left';
+            ctx.fillText('Negative', negativeLegendX + 24, legendY + 13);
+            
+            // Draw bars
+            categories.forEach((category, index) => {
+                const x = 60 + index * barGroupWidth + barGroupWidth / 2;
+                const data = categoryData[category];
+                
+                // Calculate bar heights
+                const positiveHeight = (data.positive / maxValue) * chartAreaHeight;
+                const negativeHeight = (data.negative / maxValue) * chartAreaHeight;
+                
+                // Draw stacked bars - both starting from the same baseline
+                const barX = x - individualBarWidth / 2;
+                
+                // Draw negative bar first (bottom part, starts from baseline)
+                ctx.fillStyle = '#e53e3e';
+                ctx.fillRect(barX, yAxisStart - negativeHeight, individualBarWidth, negativeHeight);
+                
+                // Draw positive bar on top (starts where negative bar ends)
+                ctx.fillStyle = '#3182ce';
+                ctx.fillRect(barX, yAxisStart - negativeHeight - positiveHeight, individualBarWidth, positiveHeight);
+                
+                // Draw total count above the stacked bars
+                ctx.fillStyle = '#4a5568';
+                ctx.font = '12px Inter';
+                ctx.textAlign = 'center';
+                const totalCount = data.positive + data.negative;
+                ctx.fillText(totalCount, x, yAxisStart - negativeHeight - positiveHeight - 5);
+                
+                // Draw category label
+                ctx.fillStyle = '#4a5568';
+                ctx.font = '12px Inter';
+                ctx.textAlign = 'center';
+                const labelY = height - 60;
+                const words = category.replace(/_/g, ' ').split(' ');
+                let line = '';
+                let currentY = labelY;
+                
+                for (let i = 0; i < words.length; i++) {
+                    const testLine = line + words[i] + ' ';
+                    const metrics = ctx.measureText(testLine);
+                    const testWidth = metrics.width;
+                    
+                    if (testWidth > barGroupWidth - 10 && i > 0) {
+                        ctx.fillText(line.trim(), x, currentY);
+                        line = words[i] + ' ';
+                        currentY += 15;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                ctx.fillText(line.trim(), x, currentY);
+            });
+        }
+
+        // Update trend chart
+        function updateTrendChart(yearData) {
+            const canvas = document.getElementById('trendChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Set high DPI for crisp rendering
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            const width = canvas.width / dpr;
+            const height = canvas.height / dpr;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            const hotels = Object.keys(yearData);
+            const colors = ['#3182ce', '#38a169', '#d69e2e', '#e53e3e', '#805ad5'];
+            
+            // Find max count for Y-axis scaling
+            let maxCount = 0;
+            Object.values(yearData).forEach(hotelData => {
+                Object.values(hotelData).forEach(yearData => {
+                    maxCount = Math.max(maxCount, yearData.total);
+                });
+            });
+            
+            // Draw Y-axis
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(60, 40);
+            ctx.lineTo(60, height - 80);
+            ctx.stroke();
+            
+            // Y-axis labels
+            ctx.fillStyle = '#4a5568';
+            ctx.font = '12px Inter';
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 4; i++) {
+                const y = height - 80 - (i / 4) * (height - 120);
+                const value = Math.round((i / 4) * maxCount);
+                ctx.fillText(value.toString(), 55, y + 4);
+            }
+            
+            // Draw X-axis
+            ctx.beginPath();
+            ctx.moveTo(60, height - 80);
+            ctx.lineTo(width - 40, height - 80);
+            ctx.stroke();
+            
+                         // X-axis labels
+             ctx.textAlign = 'center';
+             ctx.font = '10px Inter'; // Smaller font for X-axis labels
+             const years = [...new Set(Object.values(yearData).flatMap(hotel => Object.keys(hotel)))].sort();
+             
+             // If 8 or more years, show every other year (1-year gap) for X-axis labels
+             // Note: Trend lines still use all years for data points, only labels are filtered
+             let displayYears = years;
+             if (years.length >= 8) {
+                 displayYears = years.filter((_, index) => index % 2 === 0);
+             }
+             
+             displayYears.forEach((year, index) => {
+                 const x = 60 + (index / (displayYears.length - 1)) * (width - 100);
+                 ctx.fillText(year, x, height - 60);
+             });
+            
+            // Draw trend lines for each hotel
+            hotels.forEach((hotel, hotelIndex) => {
+                const color = colors[hotelIndex % colors.length];
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                
+                // Collect all points first
+                const points = [];
+                years.forEach(year => {
+                    if (yearData[hotel][year]) {
+                        const x = 60 + (years.indexOf(year) / (years.length - 1)) * (width - 100);
+                        const y = height - 80 - (yearData[hotel][year].total / maxCount) * (height - 120);
+                        points.push({ x, y, count: yearData[hotel][year].total });
+                    }
+                });
+                
+                // Draw continuous line
+                if (points.length > 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(points[0].x, points[0].y);
+                    for (let i = 1; i < points.length; i++) {
+                        ctx.lineTo(points[i].x, points[i].y);
+                    }
+                    ctx.stroke();
+                }
+                
+                // Draw data points
+                points.forEach(point => {
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // Count label above point
+                    ctx.fillStyle = '#4a5568';
+                    ctx.font = '11px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(point.count.toString(), point.x, point.y - 10);
+                });
+            });
+            
+                                                   // Draw legend with smaller size and reduced width
+             let legendY = 20;
+             hotels.forEach((hotel, hotelIndex) => {
+                 const color = colors[hotelIndex % colors.length];
+                 ctx.fillStyle = color;
+                 ctx.fillRect(width - 100, legendY, 8, 8); // Even smaller legend boxes
+                 
+                 ctx.fillStyle = '#4a5568';
+                 ctx.font = '7px Inter'; // Smallest font for legend text
+                 ctx.textAlign = 'left';
+                 
+                 // Handle long hotel names with word wrapping and much shorter max width
+                 const hotelName = hotel;
+                 const maxWidth = 60; // Reduced from 80 to 60
+                 const words = hotelName.split(' ');
+                 let currentLine = '';
+                 let lineCount = 0;
+                 
+                 words.forEach(word => {
+                     const testLine = currentLine + (currentLine ? ' ' : '') + word;
+                     const testWidth = ctx.measureText(testLine).width;
+                     
+                     if (testWidth > maxWidth && currentLine) {
+                         ctx.fillText(currentLine, width - 90, legendY + 6 + (lineCount * 6));
+                         currentLine = word;
+                         lineCount++;
+                     } else {
+                         currentLine = testLine;
+                     }
+                 });
+                 
+                 if (currentLine) {
+                     ctx.fillText(currentLine, width - 90, legendY + 6 + (lineCount * 6));
+                 }
+                 
+                 legendY += 10 + (lineCount * 6); // Most compact spacing
+             });
+            
+            // Axis labels
+            ctx.fillStyle = '#4a5568';
+            ctx.font = '14px Inter';
+            ctx.textAlign = 'center';
+            
+            // Draw vertical "Review Count" label
+            ctx.save();
+            ctx.translate(20, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Review Count', 0, 0);
+            ctx.restore();
+            
+            ctx.fillText('Year', width / 2, height - 20);
+        }
+
+        // Update keywords
+        function updateKeywords(keywords) {
+            const grid = document.getElementById('keywordsGrid');
+            grid.innerHTML = '';
+            
+            keywords.forEach(([keyword, count]) => {
+                const tag = document.createElement('div');
+                tag.className = 'keyword-tag';
+                tag.innerHTML = `
+                    <span>${keyword}</span>
+                    <span class="keyword-count">${count}</span>
+                `;
+                tag.onclick = () => showKeywordReviews(keyword, count);
+                grid.appendChild(tag);
+            });
+        }
+
+                          // Update table
+         function updateTable(tableData) {
+             const tbody = document.getElementById('tableBody');
+             tbody.innerHTML = '';
+             
+             tableData.forEach(review => {
+                 const row = document.createElement('tr');
+                 row.innerHTML = `
+                     <td>${review.hotel_name}</td>
+                     <td>${review.hotel_city}</td>
+                     <td>${review.bubble}</td>
+                     <td>${review.categories}</td>
+                     <td>${review.business_summary}</td>
+                     <td>${review.keywords}</td>
+                     <td>${review.review_date}</td>
+                 `;
+                 row.onclick = () => openDrawer(review);
+                 row.style.cursor = 'pointer';
+                 tbody.appendChild(row);
+             });
+         }
+
+        // Update filters
+        function updateFilters(filters) {
+            const hotelSelect = document.getElementById('hotelFilter');
+            const citySelect = document.getElementById('cityFilter');
+            
+            // Store current selections
+            const currentHotel = hotelSelect.value;
+            const currentCity = citySelect.value;
+            
+            // Update hotel options
+            hotelSelect.innerHTML = '<option value="">All Hotels</option>';
+            filters.hotels.forEach(hotel => {
+                const option = document.createElement('option');
+                option.value = hotel;
+                option.textContent = hotel;
+                // Restore selection if it still exists in filtered options
+                if (hotel === currentHotel) {
+                    option.selected = true;
+                }
+                hotelSelect.appendChild(option);
+            });
+            
+            // Update city options
+            citySelect.innerHTML = '<option value="">All Cities</option>';
+            filters.cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                // Restore selection if it still exists in filtered options
+                if (city === currentCity) {
+                    option.selected = true;
+                }
+                citySelect.appendChild(option);
+            });
+        }
+
+        // Update last updated
+        function updateLastUpdated(timestamp) {
+            if (timestamp) {
+                const date = new Date(timestamp);
+                document.getElementById('lastUpdated').textContent = 
+                    `Last updated: ${date.toLocaleString()}`;
+            }
+        }
+        
+        // Update filter active states
+        function updateFilterActiveStates() {
+            const hotelSelect = document.getElementById('hotelFilter');
+            const citySelect = document.getElementById('cityFilter');
+            const startDateInput = document.getElementById('startDateFilter');
+            const endDateInput = document.getElementById('endDateFilter');
+            const searchInput = document.getElementById('searchInput');
+            
+            // Add/remove active class based on whether filters have values
+            hotelSelect.classList.toggle('active', hotelSelect.value !== '');
+            citySelect.classList.toggle('active', citySelect.value !== '');
+            startDateInput.classList.toggle('active', startDateInput.value !== '');
+            endDateInput.classList.toggle('active', endDateInput.value !== '');
+            searchInput.classList.toggle('active', searchInput.value !== '');
+        }
+
+        // Apply filters
+        async function applyFilters() {
+            const hotel = document.getElementById('hotelFilter').value;
+            const city = document.getElementById('cityFilter').value;
+            const startDate = document.getElementById('startDateFilter').value;
+            const endDate = document.getElementById('endDateFilter').value;
+            const search = document.getElementById('searchInput').value;
+            
+            console.log('Applying filters:', { hotel, city, startDate, endDate, search });
+            
+            currentFilters = { hotel, city, startDate, endDate, search };
+            
+            // Update active states for filter inputs
+            updateFilterActiveStates();
+            
+            const params = new URLSearchParams();
+            if (hotel) params.append('hotel', hotel);
+            if (city) params.append('city', city);
+            if (startDate) params.append('startDate', startDate);
+            if (endDate) params.append('endDate', endDate);
+            if (search) params.append('search', search);
+            
+            const url = `/api/data?${params.toString()}`;
+            console.log('Fetching from URL:', url);
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                console.log('Received filtered data:', data);
+                console.log('Metrics:', data.metrics);
+                console.log('Table data length:', data.table_data ? data.table_data.length : 'undefined');
+                
+                updateDashboard(data);
+                
+                // Update the last updated timestamp to show when filters were applied
+                document.getElementById('lastUpdated').textContent = 
+                    `Last updated: ${new Date().toLocaleString()} (Filtered)`;
+            } catch (error) {
+                console.error('Error applying filters:', error);
+            }
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('hotelFilter').value = '';
+            document.getElementById('cityFilter').value = '';
+            document.getElementById('startDateFilter').value = '';
+            document.getElementById('endDateFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            
+            // Clear search area when no filters are selected
+            currentFilters = {};
+            
+            // Clear active states
+            updateFilterActiveStates();
+            
+            loadDashboardData();
+        }
+
+        // Open review drawer
+        function openDrawer(review) {
+            const drawer = document.getElementById('reviewDrawer');
+            const content = document.getElementById('drawerContent');
+            
+            content.innerHTML = `
+                <div class="review-section">
+                    <h3>Review Title</h3>
+                    <p>${review.title || 'No title'}</p>
+                </div>
+                <div class="review-section">
+                    <h3>Review Content</h3>
+                    <p>${review.content || 'No content'}</p>
+                </div>
+                <div class="review-section">
+                    <h3>Business Summary</h3>
+                    <p>${review.business_summary || 'No summary'}</p>
+                </div>
+                <div class="review-section">
+                    <h3>Keywords</h3>
+                    <p>${review.keywords || 'No keywords'}</p>
+                </div>
+            `;
+            
+            drawer.classList.add('open');
+        }
+
+        // Close drawer
+        function closeDrawer() {
+            document.getElementById('reviewDrawer').classList.remove('open');
+        }
+
+        // Show keyword reviews
+        async function showKeywordReviews(keyword, expectedCount) {
+            const popup = document.getElementById('keywordPopup');
+            const title = document.getElementById('keywordPopupTitle');
+            const content = document.getElementById('keywordPopupContent');
+            
+            title.textContent = `Reviews containing "${keyword}"`;
+            
+            // Show loading state
+            content.innerHTML = `
+                <div style="margin-bottom: 16px;">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Searching for reviews containing "${keyword}"...
+                    </div>
+                </div>
+            `;
+            
+            popup.classList.add('show');
+            
+            try {
+                // Build search URL with current filters
+                const params = new URLSearchParams();
+                params.append('keyword', keyword);
+                
+                // Add current filters to maintain context
+                if (currentFilters.hotel) params.append('hotel', currentFilters.hotel);
+                if (currentFilters.city) params.append('city', currentFilters.city);
+                if (currentFilters.startDate) params.append('startDate', currentFilters.startDate);
+                if (currentFilters.endDate) params.append('endDate', currentFilters.endDate);
+                
+                const response = await fetch(`/api/keyword-search?${params.toString()}`);
+                const data = await response.json();
+                
+                if (data.reviews && data.reviews.length > 0) {
+                    content.innerHTML = `
+                        <div style="margin-bottom: 16px;">
+                            <span class="keyword-count-badge">${data.count} reviews found</span>
+                            ${data.count > data.limited_count ? `<span style="color: #718096; font-size: 12px; margin-left: 8px;">(Showing first ${data.limited_count})</span>` : ''}
+                        </div>
+                        ${data.reviews.map(review => `
+                            <div class="review-item">
+                                <div class="review-header">
+                                    <span class="review-hotel">${review.hotel_name}</span>
+                                    <span class="review-rating">${review.bubble}/5</span>
+                                </div>
+                                <div class="review-content">
+                                    ${review.content.replace(new RegExp(keyword, 'gi'), 
+                                        `<span class="highlighted-keyword">${keyword}</span>`)}
+                                </div>
+                            </div>
+                        `).join('')}
+                    `;
+                } else {
+                    content.innerHTML = `
+                        <div style="margin-bottom: 16px;">
+                            <span class="keyword-count-badge">0 reviews found</span>
+                        </div>
+                        <div style="text-align: center; color: #718096; padding: 20px;">
+                            No reviews found containing "${keyword}" with the current filters.
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error searching for keyword:', error);
+                content.innerHTML = `
+                    <div style="margin-bottom: 16px;">
+                        <span class="keyword-count-badge">Error</span>
+                    </div>
+                    <div style="text-align: center; color: #e53e3e; padding: 20px;">
+                        Error searching for reviews. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+                 // Load negative reviews by category
+         async function loadNegativeReviews() {
+             try {
+                 // Build URL with current filters
+                 const params = new URLSearchParams();
+                 if (currentFilters.hotel) params.append('hotel', currentFilters.hotel);
+                 if (currentFilters.city) params.append('city', currentFilters.city);
+                 if (currentFilters.startDate) params.append('startDate', currentFilters.startDate);
+                 if (currentFilters.endDate) params.append('endDate', currentFilters.endDate);
+                 
+                 const response = await fetch(`/api/negative-reviews?${params.toString()}`);
+                 const data = await response.json();
+                 
+                 updateNegativeReviewsUI(data.category_reviews, data.total_negative_reviews);
+             } catch (error) {
+                 console.error('Error loading negative reviews:', error);
+                 document.getElementById('negativeReviewsContent').innerHTML = `
+                     <div style="text-align: center; color: #e53e3e; padding: 20px;">
+                         Error loading negative reviews. Please try again.
+                     </div>
+                 `;
+             }
+         }
+
+         // Update negative reviews UI
+         function updateNegativeReviewsUI(categoryReviews, totalNegative) {
+             const tabsContainer = document.getElementById('categoryTabs');
+             const contentContainer = document.getElementById('negativeReviewsContent');
+             
+             // Create category tabs
+             tabsContainer.innerHTML = '';
+             const categories = Object.keys(categoryReviews);
+             
+             categories.forEach((category, index) => {
+                 const tab = document.createElement('div');
+                 tab.className = 'category-tab';
+                 if (index === 0) tab.classList.add('active');
+                 
+                 const reviewCount = categoryReviews[category].length;
+                 const categoryName = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                 
+                 tab.textContent = `${categoryName} (${reviewCount})`;
+                 tab.onclick = () => switchCategoryTab(category, categoryReviews, index);
+                 
+                 tabsContainer.appendChild(tab);
+             });
+             
+             // Show first category by default
+             if (categories.length > 0) {
+                 showCategoryReviews(categories[0], categoryReviews[categories[0]]);
+             }
+         }
+
+         // Switch between category tabs
+         function switchCategoryTab(category, categoryReviews, tabIndex) {
+             // Update active tab
+             document.querySelectorAll('.category-tab').forEach((tab, index) => {
+                 tab.classList.toggle('active', index === tabIndex);
+             });
+             
+             // Show category reviews
+             showCategoryReviews(category, categoryReviews[category]);
+         }
+
+         // Show reviews for a specific category
+         function showCategoryReviews(category, reviews) {
+             const contentContainer = document.getElementById('negativeReviewsContent');
+             
+             if (!reviews || reviews.length === 0) {
+                 contentContainer.innerHTML = `
+                     <div style="text-align: center; color: #718096; padding: 40px;">
+                         No negative reviews found for ${category.replace(/_/g, ' ')}.
+                     </div>
+                 `;
+                 return;
+             }
+             
+             const categoryName = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+             
+             contentContainer.innerHTML = `
+                 <div style="margin-bottom: 20px;">
+                     <h4 style="color: #e53e3e; margin: 0;">${reviews.length} negative reviews for ${categoryName}</h4>
+                     <p style="color: #718096; margin: 8px 0 0 0; font-size: 12px;">
+                         Click on any review to see detailed improvement suggestions.
+                     </p>
+                 </div>
+                 ${reviews.map(review => `
+                     <div class="negative-review-item" onclick="openNegativeReviewDetail('${category}', ${JSON.stringify(review).replace(/"/g, '&quot;')})">
+                         <div class="negative-review-header">
+                             <span class="negative-review-hotel">${review.hotel_name}</span>
+                             <span class="negative-review-rating">${review.bubble}/5</span>
+                         </div>
+                         <div class="negative-review-date">${review.review_date}</div>
+                         <div class="negative-review-content">
+                             ${review.content ? review.content.substring(0, 150) + (review.content.length > 150 ? '...' : '') : 'No content'}
+                         </div>
+                         ${review.business_summary ? `
+                             <div class="negative-review-summary">
+                                 <h4>Improvement Focus:</h4>
+                                 <p>${review.business_summary}</p>
+                             </div>
+                         ` : ''}
+                     </div>
+                 `).join('')}
+             `;
+         }
+
+         // Open negative review detail (reuse existing drawer)
+         function openNegativeReviewDetail(category, review) {
+             const drawer = document.getElementById('reviewDrawer');
+             const content = document.getElementById('drawerContent');
+             
+             const categoryName = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+             
+             content.innerHTML = `
+                 <div class="review-section">
+                     <h3>Negative Review - ${categoryName}</h3>
+                     <p><strong>Hotel:</strong> ${review.hotel_name}</p>
+                     <p><strong>Rating:</strong> ${review.bubble}/5</p>
+                     <p><strong>Date:</strong> ${review.review_date}</p>
+                 </div>
+                 <div class="review-section">
+                     <h3>Review Content</h3>
+                     <p>${review.content || 'No content'}</p>
+                 </div>
+                 <div class="review-section">
+                     <h3>Business Summary & Improvement Focus</h3>
+                     <p>${review.business_summary || 'No improvement suggestions available'}</p>
+                 </div>
+                 <div class="review-section">
+                     <h3>Categories</h3>
+                     <p>${review.categories || 'No categories'}</p>
+                 </div>
+                 <div class="review-section">
+                     <h3>Keywords</h3>
+                     <p>${review.keywords || 'No keywords'}</p>
+                 </div>
+             `;
+             
+             drawer.classList.add('open');
+         }
+
+         // Close keyword popup
+         function closeKeywordPopup() {
+             document.getElementById('keywordPopup').classList.remove('show');
+         }
+
+        // Utility function for debouncing
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Close drawer when clicking outside
+        document.addEventListener('click', function(e) {
+            const drawer = document.getElementById('reviewDrawer');
+            const popup = document.getElementById('keywordPopup');
+            
+            if (e.target === drawer) {
+                closeDrawer();
+            }
+            
+            if (e.target === popup) {
+                closeKeywordPopup();
+            }
+        });
+    </script>
+</body>
+</html>
+
